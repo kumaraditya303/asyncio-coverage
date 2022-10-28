@@ -2,6 +2,8 @@ name: asyncio coverage
 
 on:
   push:
+    branches:
+      - main
   schedule:
     # Run this daily at 2400 UTC
     - cron: '0 0 * * *'
