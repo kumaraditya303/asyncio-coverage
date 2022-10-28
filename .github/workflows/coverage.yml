@@ -12,6 +12,7 @@ jobs:
   coverage:
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v3
       - name: Clone CPython
         uses: actions/checkout@v3
         with:
@@ -20,17 +21,27 @@ jobs:
       - name: Compile CPython
         run: |
           ./configure --with-pydebug
-          make -j2
+          make -j
         working-directory: cpython
       - name: Run coverage
         run: |
           ./python -m ensurepip
           ./python -m pip install coverage
-          ./python -m coverage run --pylib --source=Lib/asyncio Lib/test/regrtest.py test_asyncio
+          ./python -m coverage run --pylib --source=Lib/asyncio Lib/test/regrtest.py test_dict
           ./python -m coverage html
         working-directory: cpython
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: cpython/htmlcov
-          branch: gh-pages
+        run: |
+          cd cpython
+          mv htmlcov /tmp/htmlcov
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset --hard
+          cd ..
+          rm -rf cpython
+          git branch -D gh-pages || true
+          git checkout -b gh-pages
+          mv /tmp/htmlcov/* .
+          git add -A
+          git commit -m "Coverage report"
+          git push -u --force origin gh-pages
