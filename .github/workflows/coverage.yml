@@ -27,7 +27,7 @@ jobs:
         run: |
           ./python -m ensurepip
           ./python -m pip install coverage
-          ./python -m coverage run --pylib --source=Lib/asyncio Lib/test/regrtest.py test_dict
+          ./python -m coverage run --pylib --source=Lib/asyncio Lib/test/regrtest.py test_asyncio
           ./python -m coverage html
         working-directory: cpython
       - name: Deploy
