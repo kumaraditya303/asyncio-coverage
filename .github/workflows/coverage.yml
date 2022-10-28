@@ -1,0 +1,36 @@
+name: asyncio coverage
+
+on:
+  push:
+  schedule:
+    # Run this daily at 2400 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+
+jobs:
+  coverage:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone CPython
+        uses: actions/checkout@v3
+        with:
+          repository: python/cpython
+          path: cpython
+      - name: Compile CPython
+        run: |
+          ./configure --with-pydebug
+          make -j2
+        working-directory: cpython
+      - name: Run coverage
+        run: |
+          ./python -m ensurepip
+          ./python -m pip install coverage
+          ./python -m coverage run --pylib --source=Lib/asyncio Lib/test/regrtest.py test_asyncio
+          ./python -m coverage html
+        working-directory: cpython
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: cpython/htmlcov
+          branch: gh-pages
